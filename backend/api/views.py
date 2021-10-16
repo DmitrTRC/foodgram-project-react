@@ -1,14 +1,14 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+import users.models
+from api.datatools.make_pdf import make_pdf
 from api.filters import AuthorAndTagFilter, IngredientSearchFilter
 from api.models import (Cart, Favorite, Ingredient, IngredientAmount, Recipe,
                         Tag)
@@ -39,7 +39,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_class = AuthorAndTagFilter
     permission_classes = [IsOwnerOrReadOnly]
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer) -> None:
         serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['get', 'delete'],
@@ -62,7 +62,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
-    def download_shopping_cart(self, request):
+    def download_shopping_cart(self, request) -> HttpResponse:
         final_list = {}
         ingredients = IngredientAmount.objects.filter(
             recipe__cart__user=request.user).values_list(
@@ -77,25 +77,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 }
             else:
                 final_list[name]['amount'] += item[2]
-        pdfmetrics.registerFont(
-            TTFont('Slimamif', 'Slimamif.ttf', 'UTF-8'))
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = ('attachment; '
-                                           'filename="shopping_list.pdf"')
-        page = canvas.Canvas(response)
-        page.setFont('Slimamif', size=24)
-        page.drawString(200, 800, 'Список ингредиентов')
-        page.setFont('Slimamif', size=16)
-        height = 750
-        for i, (name, data) in enumerate(final_list.items(), 1):
-            page.drawString(75, height, (f'<{i}> {name} - {data["amount"]}, '
-                                         f'{data["measurement_unit"]}'))
-            height -= 25
-        page.showPage()
-        page.save()
+
+        response = make_pdf(final_list)
         return response
 
-    def add_obj(self, model, user, pk):
+    def add_obj(self, model, user: users.models.User, pk: int) -> Response:
         if model.objects.filter(user=user, recipe__id=pk).exists():
             return Response({
                 'errors': 'Рецепт уже добавлен в список'
@@ -105,7 +91,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = CropRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete_obj(self, model, user, pk):
+    def delete_obj(self, model, user: users.models.User, pk: int) -> Response:
         obj = model.objects.filter(user=user, recipe__id=pk)
         if obj.exists():
             obj.delete()

@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import FilterSet, filters
 from rest_framework.filters import SearchFilter
 
-from api.models import Recipe
+from api import models
 
 User = get_user_model()
 
@@ -29,5 +29,5 @@ class AuthorAndTagFilter(FilterSet):
         return queryset
 
     class Meta:
-        model = Recipe
+        model = models.Recipe
         fields = ('tags', 'author')

@@ -28,7 +28,7 @@ class Command(BaseCommand):
                                                   measurement_unit=ingredient[
                                                       "measurement_unit"])
                     except IntegrityError:
-                        print(f'Ингридиет {ingredient["name"]} '
+                        print(f'Ингредиент {ingredient["name"]} '
                               f'{ingredient["measurement_unit"]} '
                               f'уже есть в базе')
 

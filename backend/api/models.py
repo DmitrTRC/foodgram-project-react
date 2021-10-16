@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 
+from api import consts
+
 User = get_user_model()
 
 
@@ -25,25 +27,12 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    BLUE = '#0000FF'
-    ORANGE = '#FFA500'
-    GREEN = '#008000'
-    PURPLE = '#800080'
-    YELLOW = '#FFFF00'
-
-    COLOR_CHOICES = [
-        (BLUE, 'Синий'),
-        (ORANGE, 'Оранжевый'),
-        (GREEN, 'Зеленый'),
-        (PURPLE, 'Фиолетовый'),
-        (YELLOW, 'Желтый'),
-    ]
     name = models.CharField(max_length=200, unique=True,
                             verbose_name='Название тега')
-    color = models.CharField(max_length=7, unique=True, choices=COLOR_CHOICES,
+    color = models.CharField(max_length=7, unique=True, choices=consts.TAG_COLOR_CHOICES,
                              verbose_name='Цвет в HEX')
     slug = models.SlugField(max_length=200, unique=True,
-                            verbose_name='Уникальный слаг')
+                            verbose_name='Уникальный slug')
 
     class Meta:
         ordering = ['-id']
@@ -89,7 +78,7 @@ class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингридиент',
+        verbose_name='Ингредиент',
     )
     recipe = models.ForeignKey(
         Recipe,
@@ -99,14 +88,14 @@ class IngredientAmount(models.Model):
     amount = models.PositiveSmallIntegerField(
         validators=(
             validators.MinValueValidator(
-                1, message='Минимальное количество ингридиентов 1'),),
+                1, message='Минимальное количество ингредиентов 1'),),
         verbose_name='Количество',
     )
 
     class Meta:
         ordering = ['-id']
-        verbose_name = 'Количество ингридиента'
-        verbose_name_plural = 'Количество ингридиентов'
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
         constraints = [
             models.UniqueConstraint(fields=['ingredient', 'recipe'],
                                     name='unique ingredients recipe')
