@@ -46,14 +46,8 @@ class CustomUserViewSet(UserViewSet):
             return Response({
                 'errors': 'Вы не можете отписываться от самого себя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        follow = models.Follow.objects.filter(user=user, author=author).delete()
-        if follow.exists():
-            follow.delete()  # ToDO Убрать в  49 строку
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response({
-            'errors': 'Вы уже отписались'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        models.Follow.objects.filter(user=user, author=author).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request) -> Any:
