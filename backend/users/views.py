@@ -39,16 +39,16 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def del_subscribe(self, request, id=None) -> Response:
+    def del_subscribe(self, request, id: int = None) -> Response:
         user = request.user
         author = get_object_or_404(User, id=id)
         if user == author:
             return Response({
                 'errors': 'Вы не можете отписываться от самого себя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        follow = models.Follow.objects.filter(user=user, author=author)
+        follow = models.Follow.objects.filter(user=user, author=author).delete()
         if follow.exists():
-            follow.delete()
+            follow.delete()  # ToDO Убрать в  49 строку
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response({
