@@ -93,12 +93,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe) -> None:
-        for ingredient in ingredients:
-            models.IngredientAmount.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+        objs = [models.IngredientAmount(recipe=recipe,
+                                        ingredient_id=ingredient.get('id'),
+                                        amount=ingredient.get('amount'))
+                for ingredient in ingredients]
+        models.IngredientAmount.objects.bulk_create(objs)
 
     @transaction.atomic
     def create(self, validated_data) -> models.Recipe:
