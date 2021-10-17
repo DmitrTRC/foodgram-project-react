@@ -1,5 +1,6 @@
 from typing import Optional
 
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -99,6 +100,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient.get('amount'),
             )
 
+    @transaction.atomic
     def create(self, validated_data) -> models.Recipe:
         image = validated_data.pop('image')
         ingredients_data = validated_data.pop('ingredients')
@@ -108,6 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         self.create_ingredients(ingredients_data, recipe)
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         instance.image = validated_data.get('image', instance.image)
         instance.name = validated_data.get('name', instance.name)
