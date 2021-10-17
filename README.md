@@ -41,12 +41,12 @@ scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 
 * Cоздайте .env файл и впишите:
     ```text
-    DB_ENGINE=<django.db.backends.postgresql>
+    DB_ENGINE= // По умолчанию указан драйвер "django.db.backends.postgresql"
     DB_NAME=<имя базы данных postgres>
     DB_USER=<пользователь бд>
     DB_PASSWORD=<пароль>
     DB_HOST=<db>
-    DB_PORT=<5432>
+    DB_PORT=<порт>  // По умолчанию указан порт 5432
     SECRET_KEY=<секретный ключ проекта django>
     ```
 * Для работы с Workflow добавьте в Secrets GitHub переменные окружения для работы:
